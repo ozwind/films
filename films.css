@@ -1,0 +1,80 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+th, td {
+    text-align: left;
+    padding-right: 10px;
+}
+
+.highlight {
+    background-color: blue;
+    color: white;
+}
+
+.even {
+    color: white;
+}
+
+.odd {
+    color: lightgoldenrodyellow;
+}
+
+.popcorn {
+    padding-left: 10px;
+}
+
+tr > td:first-child {
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+#container {
+    display: flex;
+    height: 100%;
+}
+
+html, body {
+    width: calc(100% - 8px);
+    height: calc(100% - 8px);
+    overflow: hidden;
+}
+
+#mainTable {
+    overflow-y: auto;
+    flex: 0 0 auto;
+}
+
+#mainTable th {
+    cursor: pointer;
+    font-size: x-large;
+    color: antiquewhite;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+#infoTable {
+    padding-left: 5px;
+}
+
+#infoTable th {
+    font-size: x-large;
+    color: antiquewhite;
+}
+
+#infoTable img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Ensure the image scales while preserving aspect ratio */
+}
+
+#version {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: small;
+    color: bisque;
+}
