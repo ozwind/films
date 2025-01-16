@@ -1451,5 +1451,12 @@ let directors = [
     imdb: "nm0000186",
     films: ["Eraserhead", "The Elephant Man", "Dune", "Blue Velvet", "Wild at Heart", "Twin Peaks: Fire Walk with Me", "Lost Highway", "The Straight Story", "Mulholland Drive", "Inland Empire"],
     photo: "https://m.media-amazon.com/images/M/MV5BMTY3MTk1NzAxOV5BMl5BanBnXkFtZTYwOTA2NTE1._V1_QL75_UX820_.jpg"
+},
+{
+    name: "Wes Anderson",
+    lived: "1969-",
+    imdb: "nm0027572",
+    films: ["Bottle Rocket", "Rushmore", "The Royal Tenenbaums", "The Life Aquatic with Steve Zissou", "The Darjeeling Limited", "Fantastic Mr. Fox", "Moonrise Kingdom", "The Grand Budapest Hotel", "Isle of Dogs", "The French Dispatch", "Asteroid City"],
+    photo: "https://m.media-amazon.com/images/M/MV5BNDJiNDVjNzAtMDczNS00OTVkLTg2ZjAtNjQ5ODczNGUyMDU4XkEyXkFqcGc@._V1_QL75_UX820_.jpg"
 }
 ];

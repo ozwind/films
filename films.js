@@ -161,10 +161,6 @@ function initTable() {
     $('tbody tr').hover(
         function() {
             hover($(this));
-        },
-        function() {
-            $(this).removeClass('highlight');
-            $(INFO_TBL).empty();
         }
     );
 
@@ -214,6 +210,8 @@ function initInfoTable(entry) {
         const $img = $("<img>").attr("src", entry.photo);
         $infoTbl.append($img);
     }
+
+    document.title = entry.name;
 }
 
 function hover($this) {
