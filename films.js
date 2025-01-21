@@ -17,11 +17,23 @@ let selType = types[0];
 
 function init() {
     setFilmStore(localStorage.getItem(FILM_LIST_STORE));
-    films.sort((a, b) => a.name.localeCompare(b.name));      // Sort films by title name
+    sortFilms();
     directors.sort((a, b) => a.name.localeCompare(b.name));  // Sort directors by name
     stars.sort((a, b) => a.name.localeCompare(b.name));      // Sort stars by name
     initTable();
     initHandlers();
+}
+
+function sortFilms() {  // library sort films
+    films.sort((a, b) => {
+        const titleA = removeArticle(a.name).toLowerCase();
+        const titleB = removeArticle(b.name).toLowerCase();
+        return titleA.localeCompare(titleB);
+    });
+}
+
+function removeArticle(title) {
+    return title.replace(/^(The|A|An)\s+/i, "");
 }
 
 function setFilmStore(name) {
