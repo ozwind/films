@@ -21,6 +21,11 @@ th, td {
     color: lightgoldenrodyellow;
 }
 
+.clickable {
+    color: yellow;
+    cursor: pointer;
+}
+
 .popcorn {
     padding-left: 10px;
 }

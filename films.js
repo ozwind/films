@@ -4,6 +4,7 @@ Author: Cliff Hewitt
 
 30-Dec-2024  Inception
 14-Jan-2025  Movie reactions included
+25-Jan-2025  Add yellow imdb links in list of #infoTable films and stars
 
 */
 
@@ -11,9 +12,11 @@ const MAIN_TBL = "#mainTable";
 const INFO_TBL = "#infoTable";
 const HIGHLIGHT = "highlight";
 const FILM_LIST_STORE = "filmListStore";
+const CLICKABLE = "clickable";
 let types = [films, stars, directors];
 let names = ["films", "stars", "directors"];
 let selType = types[0];
+let hasFocus = true;      // web-app hasFocus
 
 function init() {
     setFilmStore(localStorage.getItem(FILM_LIST_STORE));
@@ -59,14 +62,32 @@ function initHandlers() {
     $document.click(function(event) {
         openUrl(event);
     });
+
+    $(window).on("focus blur", function (e) {
+        hasFocus = e.type === "focus";
+    });
 }
 
 function openUrl(event) {
     let url;
-    const name = $(MAIN_TBL + " ." + HIGHLIGHT + " td").text();
-    
-    if (name) {
-        const prefix = "https://imdb.com/";
+    const $target = $(event.target);
+    const prefix = "https://imdb.com/";
+    let name = $(MAIN_TBL + " ." + HIGHLIGHT + " td").text();
+
+    if ($target.hasClass(CLICKABLE)) {
+        name = $target.text();
+        const film = films.find(d => d.name === name);
+        if (film) {
+            url = prefix + "title/" + film.imdb + "/";
+        }
+        else {
+            const star = stars.find(d => d.name === name);
+            if (star) {
+                url = prefix + "name/" + star.imdb + "/";
+            }
+        }
+    }
+    else if (name && $(event.target).closest("." + HIGHLIGHT).length > 0) {
 
         if (selType === films) {
             const film = films.find(d => d.name === name);
@@ -176,6 +197,12 @@ function initTable() {
         }
     );
 
+    $(MAIN_TBL + " thead").hover(
+        function() {
+            clearHover();
+        }
+    );
+
     $(MAIN_TBL + " th").click(function() {
         advanceType(true);
     });
@@ -194,16 +221,43 @@ function initInfoTable(entry) {
         columns.push(entry.released);
         columns.push(Number(entry.rating).toFixed(1));
         columns.push(entry.director);
-        columns.push(entry.stars.join(", "));
+        let $div = $("<div>");
+        for (let i = 0; i < entry.stars.length; i++) {
+            let $span = $("<span>");
+            $span.text(entry.stars[i]);
+            const star = stars.find(d => d.name === entry.stars[i]);
+            if (star) {
+                $span.addClass(CLICKABLE);
+            }
+            if (!$div.is(":empty")) {
+                $div.append(", ");
+            }
+            $div.append($span);
+        }
+        columns.push($div);
     }
     else {
         headers = ["Alive", "Films (" + entry.films.length + ")"];
         let lived = (entry.lived || "");
         columns.push(lived);
-        let html = entry.films.map((name, index) => `<span class="${index % 2 === 0 ? 'even' : 'odd'}">${name}</span>`).join(", ");
-        columns.push(html);
+        let $div = $("<div>");
+        for (let i = 0; i < entry.films.length; i++) {
+            let cls = (i % 2) === 0 ? "even" : "odd";
+            let $span = $("<span>");
+            $span.addClass(cls);
+            const film = films.find(d => d.name === entry.films[i]);
+            if (film) {
+                $span.addClass(CLICKABLE);
+            }
+            $span.text(entry.films[i]);
+            if (!$div.is(":empty")) {
+                $div.append(", ");
+            }
+            $div.append($span);
+        }
+        columns.push($div);
     }
-
+    
     headers.forEach(header => {
         $headerRow.append($("<th>").text(header));
     });
@@ -227,9 +281,16 @@ function initInfoTable(entry) {
 }
 
 function hover($this) {
-    const name = $this.find("td").text();
+    if (hasFocus) {
+        const name = $this.find("td").text();
+        $('tbody tr').removeClass(HIGHLIGHT);
+        $this.addClass(HIGHLIGHT);
+        const entry = selType.find(item => item.name === name);
+        initInfoTable(entry);
+    }
+}
+
+function clearHover() {
     $('tbody tr').removeClass(HIGHLIGHT);
-    $this.addClass(HIGHLIGHT);
-    const entry = selType.find(item => item.name === name);
-    initInfoTable(entry);
+    $(INFO_TBL).empty();
 }
