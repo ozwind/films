@@ -63,6 +63,7 @@ html, body {
 
 #infoTable {
     padding-left: 5px;
+    width: 100%;
 }
 
 #infoTable th {
@@ -70,10 +71,23 @@ html, body {
     color: antiquewhite;
 }
 
-#infoTable img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain; /* Ensure the image scales while preserving aspect ratio */
+#photos {
+    display: grid;
+    grid-template-columns: 1fr; /* Default to 1 column */
+    gap: 8px; /* Space between images */
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+    padding-right: 2px;
+    max-height: 100vh; /* Prevents excessive height overflow */
+}
+
+#photos img {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    border: 1px solid white;
+}
+
+#photos:has(img:nth-child(2)) {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
 }
 
 #version {

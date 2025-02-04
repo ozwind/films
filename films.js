@@ -5,6 +5,7 @@ Author: Cliff Hewitt
 30-Dec-2024  Inception
 14-Jan-2025  Movie reactions included
 25-Jan-2025  Add yellow imdb links in list of #infoTable films and stars
+04-Feb-2025  Multiple photos ability added
 
 */
 
@@ -16,7 +17,6 @@ const CLICKABLE = "clickable";
 let types = [films, stars, directors];
 let names = ["films", "stars", "directors"];
 let selType = types[0];
-let hasFocus = true;      // web-app hasFocus
 
 function init() {
     setFilmStore(localStorage.getItem(FILM_LIST_STORE));
@@ -61,10 +61,6 @@ function initHandlers() {
 
     $document.click(function(event) {
         openUrl(event);
-    });
-
-    $(window).on("focus blur", function (e) {
-        hasFocus = e.type === "focus";
     });
 }
 
@@ -112,6 +108,12 @@ function openUrl(event) {
             if (star.imdb) {
                 url = prefix + "name/" + star.imdb + "/";
             }
+        }
+    }
+    else {
+        const $pointer = $target.closest(".pointer");
+        if ($pointer.length > 0) {
+            hover($pointer);
         }
     }
 
@@ -208,7 +210,7 @@ function initTable() {
     });
 }
 
-function initInfoTable(entry) {
+function showInfo(entry) {
     const $infoTbl = $(INFO_TBL);
     const $table = $("<table>");
     const $thead = $("<thead>");
@@ -272,25 +274,31 @@ function initInfoTable(entry) {
     $infoTbl.empty();
     $infoTbl.append($table);
 
-    if (entry.photo) {
-        const $img = $("<img>").attr("src", entry.photo);
-        $infoTbl.append($img);
-    }
+    const $photos = $('<div id="photos">');
+    let list = entry.photos ? entry.photos : [];
+    list.forEach(url => {
+        const $img = $("<img>").attr("src", url);
+        $photos.append($img);
+    });
+    $infoTbl.append($photos);
 
     document.title = entry.name;
 }
 
 function hover($this) {
-    if (hasFocus) {
+    if (document.hasFocus()) {
         const name = $this.find("td").text();
         $('tbody tr').removeClass(HIGHLIGHT);
         $this.addClass(HIGHLIGHT);
         const entry = selType.find(item => item.name === name);
-        initInfoTable(entry);
+        showInfo(entry);
     }
 }
 
 function clearHover() {
-    $('tbody tr').removeClass(HIGHLIGHT);
-    $(INFO_TBL).empty();
+    if (document.hasFocus()) {
+        $('tbody tr').removeClass(HIGHLIGHT);
+        $(INFO_TBL).empty();
+        document.title = "Films";
+    }
 }
