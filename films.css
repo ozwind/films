@@ -73,7 +73,6 @@ html, body {
 
 #photos {
     display: grid;
-    grid-template-columns: 1fr; /* Default to 1 column */
     gap: 8px; /* Space between images */
     overflow-y: auto; /* Enable vertical scrolling if needed */
     padding-right: 2px;
@@ -88,6 +87,11 @@ html, body {
 
 #photos:has(img:nth-child(2)) {
     grid-template-columns: repeat(2, 1fr); /* 2 columns */
+}
+
+#focusHelper {
+    position: absolute;
+    left: -9999px;
 }
 
 #version {

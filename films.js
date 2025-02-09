@@ -6,6 +6,7 @@ Author: Cliff Hewitt
 14-Jan-2025  Movie reactions included
 25-Jan-2025  Add yellow imdb links in list of #infoTable films and stars
 04-Feb-2025  Multiple photos ability added
+09-Feb-2025  Handle table keys Enter, ArrowDomn, ArrowUp, Home, End, PageDown, PageUp
 
 */
 
@@ -14,6 +15,7 @@ const INFO_TBL = "#infoTable";
 const HIGHLIGHT = "highlight";
 const FILM_LIST_STORE = "filmListStore";
 const CLICKABLE = "clickable";
+const IMDB = "https://imdb.com/";
 let types = [films, stars, directors];
 let names = ["films", "stars", "directors"];
 let selType = types[0];
@@ -51,40 +53,106 @@ function initHandlers() {
     const $document = $(document);
 
     $document.keydown(function(event) {
-        if (event.key === "ArrowLeft" || event.keyCode === 37) {
-            advanceType(false);  // back
-        }
-        else if (event.key === "ArrowRight" || event.keyCode === 39) {
-            advanceType(true);   // forward
-        }
+        keydown(event);
     });
 
     $document.click(function(event) {
-        openUrl(event);
+        click(event);
     });
 }
 
-function openUrl(event) {
+function keydown(event) {
+    if ("Enter" === event.key) {
+        const name = $(MAIN_TBL + " ." + HIGHLIGHT + " td").text();
+        const url = getUrl(name);
+        openUrl(url);
+    }
+    else if ("ArrowLeft" === event.key) {
+        advanceType(false);  // back
+    }
+    else if ("ArrowRight" === event.key) {
+        advanceType(true);  // forward
+    }
+    else if ("ArrowDown" === event.key) {
+        highlight(true);
+    }
+    else if ("ArrowUp" === event.key) {
+        highlight(false);
+    }
+    else if ("Home" === event.key) {
+        $(MAIN_TBL).scrollTop(0);
+    }
+    else if ("End" === event.key) {
+        const $mainTbl = $(MAIN_TBL);
+        $mainTbl.scrollTop($mainTbl[0].scrollHeight);
+    }
+    else if ("PageDown" === event.key) {
+        page(true);
+    }
+    else if ("PageUp" === event.key) {
+        page(false);
+    }
+}
+
+function page(down) {
+    const $mainTbl = $(MAIN_TBL);
+    const rowHeight = $(MAIN_TBL + ' table tr').outerHeight();
+    const rowsPerPage = Math.floor($mainTbl.height() / rowHeight);
+
+    if (down) {
+        $mainTbl.scrollTop($mainTbl.scrollTop() + rowHeight * rowsPerPage);
+    }
+    else {
+        $mainTbl.scrollTop($mainTbl.scrollTop() - rowHeight * rowsPerPage);
+    }
+}
+
+function highlight(next) {
+    const $rows = $(MAIN_TBL + " tbody tr");
+    const $sel = $(MAIN_TBL + " ." + HIGHLIGHT);
+    let index = 0;
+
+    if ($sel.length > 0) {
+        index = $sel[0].rowIndex - 1;
+        if (next) {
+            ++index;
+            if (index >= $rows.length) {
+                index = 0;
+            }
+        }
+        else {
+            --index;
+            if (index < 0) {
+                index = $rows.length - 1;
+            }
+        }
+    }
+
+    hover($($rows[index]));
+}
+
+function click(event) {
     let url;
     const $target = $(event.target);
-    const prefix = "https://imdb.com/";
+    //const prefix = "https://imdb.com/";
     let name = $(MAIN_TBL + " ." + HIGHLIGHT + " td").text();
 
     if ($target.hasClass(CLICKABLE)) {
         name = $target.text();
         const film = films.find(d => d.name === name);
         if (film) {
-            url = prefix + "title/" + film.imdb + "/";
+            url = IMDB + "title/" + film.imdb + "/";
         }
         else {
             const star = stars.find(d => d.name === name);
             if (star) {
-                url = prefix + "name/" + star.imdb + "/";
+                url = IMDB + "name/" + star.imdb + "/";
             }
         }
     }
     else if (name && $(event.target).closest("." + HIGHLIGHT).length > 0) {
-
+        url = getUrl(name, $(event.target).hasClass("popcorn"));
+        /*
         if (selType === films) {
             const film = films.find(d => d.name === name);
             if ($(event.target).hasClass("popcorn") && film.popcorn) {
@@ -109,6 +177,7 @@ function openUrl(event) {
                 url = prefix + "name/" + star.imdb + "/";
             }
         }
+        */
     }
     else {
         const $pointer = $target.closest(".pointer");
@@ -117,9 +186,48 @@ function openUrl(event) {
         }
     }
 
+    openUrl(url);
+}
+
+function openUrl(url) {
     if (url) {
         window.open(url, "_blank");
     }
+}
+
+function getUrl(name, popcorn) {
+    let url;
+
+    if (!name) {
+        return;
+    }
+
+    if (selType === films) {
+        const film = films.find(d => d.name === name);
+        if (popcorn && film.popcorn) {
+            url = film.popcorn;
+        }
+        else if (film.imdb) {
+            url = IMDB + "title/" + film.imdb + "/";
+        }
+    }
+    else if (selType === directors) {
+        const director = directors.find(d => d.name === name);
+        if (director.url) {
+            url = director.url;
+        }
+        else if (director.imdb) {
+            url = IMDB + "name/" + director.imdb + "/";
+        }
+    }
+    else if (selType === stars) {
+        const star = stars.find(d => d.name === name);
+        if (star.imdb) {
+            url = IMDB + "name/" + star.imdb + "/";
+        }
+    }
+
+    return url;
 }
 
 function advanceType(forward) {  // true=forward, false= back
@@ -292,6 +400,13 @@ function hover($this) {
         $this.addClass(HIGHLIGHT);
         const entry = selType.find(item => item.name === name);
         showInfo(entry);
+
+        $("#focusHelper").focus(); // Redirect focus away from the scrollbar
+        $this[0].scrollIntoView({ behavior: "smooth", block: "nearest" }); // scroll to make visible
+
+        if ($this[0].rowIndex <= 1) {  // Make sure header shows when 1st row selected
+            $(MAIN_TBL + " thead")[0].scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
     }
 }
 
